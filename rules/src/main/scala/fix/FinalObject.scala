@@ -4,9 +4,11 @@ import scalafix.v1._
 import scala.meta._
 import scala.meta.tokens.Token._
 
-/** remove redundant `final` modifier for objects */
-class FinalObject extends SemanticRule("FinalObject") {
-  override def fix(implicit doc: SemanticDocument): Patch = {
+class FinalObject extends SyntacticRule("FinalObject") {
+  override def description: String = "remove redundant `final` modifier for objects"
+  override def isRewrite: Boolean = true
+
+  override def fix(implicit doc: SyntacticDocument): Patch = {
     doc.tree.collect {
       case t: Defn.Object if t.mods.exists(_.is[Mod.Final]) =>
         // remove `final` and the space after that keyword
