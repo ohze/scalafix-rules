@@ -1,0 +1,25 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.java }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [graalvm@20, adopt@1.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up scala
+      uses: olafurpg/setup-scala@v7
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Run tests
+      run: sbt tests/test
