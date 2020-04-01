@@ -22,4 +22,4 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: Run tests
-      run: sbt tests/test
+      run: cd scalafix && sbt tests/test

@@ -12,6 +12,7 @@ scalafix --rules=github:ohze/scalafix-rules/FinalObject
 
 ## Dev guide
 ```
+cd scalafix
 sbt ~tests/test
-# edit rules/src/main/scala/fix/*.scala
+# edit scalafix/rules/src/main/scala/fix/*.scala
 ```

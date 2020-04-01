@@ -1,4 +1,4 @@
-/.idea
-/target
-/*/target
-/project/project
+/scalafix/.idea
+/scalafix/target
+/scalafix/*/target
+/scalafix/project/project
