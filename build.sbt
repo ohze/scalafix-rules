@@ -2,11 +2,11 @@ import _root_.scalafix.sbt.{BuildInfo => V}
 
 inThisBuild(
   List(
-    organization := "com.example",
-    homepage := Some(url("https://github.com/com/example")),
+    organization := "com.sandinh",
+    homepage := Some(url("https://github.com/ohze/scalafix-rules")),
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers := List(
-        Developer("example-username", "Example Full Name", "example@email.com", url("https://example.com"))),
+        Developer("thanhbv", "Bui Viet Thanh", "thanhbv@sandinh.net", url("https://sandinh.com"))),
     scalaVersion := V.scala212,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")))

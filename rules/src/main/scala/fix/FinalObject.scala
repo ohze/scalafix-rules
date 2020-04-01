@@ -4,6 +4,7 @@ import scalafix.v1._
 import scala.meta._
 import scala.meta.tokens.Token._
 
+/** remove redundant `final` modifier for objects */
 class FinalObject extends SemanticRule("FinalObject") {
   override def fix(implicit doc: SemanticDocument): Patch = {
     doc.tree.collect {
