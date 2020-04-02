@@ -1,4 +1,5 @@
 # Scalafix rules
+[![Build Statud](https://github.com/ohze/scalafix-rules/workflows/Scala%20CI/badge.svg)](https://github.com/ohze/scalafix-rules/actions?query=workflow%3A%22Scala+CI%22)
 + FinalObject
 remove redundant `final` modifier for objects
 + ConstructorProcedureSyntax
