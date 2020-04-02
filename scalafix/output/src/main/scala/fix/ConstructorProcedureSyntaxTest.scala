@@ -1,13 +1,13 @@
 package fix
 
 class ConstructorProcedureSyntaxTest(i: Long) {
-  def this(a: Int) = this(0L + 1)
-  def this(a: Int, b: Int) =
+  def this(a: Int) =  this(0L + 1) 
+  def this(a: Int, b: Int) = 
     this(0L)
   def f/**/{
     println("f")
     class X{
-      def this(a:Int) = this()
+      def this(a:Int) =     this() 
       def this (j: String)= this(j.toInt)
     }
   }
