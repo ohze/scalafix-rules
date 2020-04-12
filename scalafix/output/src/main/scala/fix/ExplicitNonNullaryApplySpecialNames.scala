@@ -1,0 +1,9 @@
+package fix
+
+// ensure ExplicitNonNullaryApply don't add `()` to `???.asInstanceOf[Int]`
+// note: we can define `class A { def asInstanceOf() = ??? }`
+// but we can't call `(new A).asInstanceOf` (without `()`) so we don't need fix that case
+object ExplicitNonNullaryApplySpecialNames {
+  ???.asInstanceOf[Int]
+  ???.isInstanceOf[String]
+}
