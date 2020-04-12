@@ -9,6 +9,8 @@ import scalafix.v1._
 
 // https://github.com/scala/scala-rewrites/blob/b2df038/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala
 class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
+  val specialNames = Set("asInstanceOf", "isInstanceOf")
+
   override def fix(implicit doc: SemanticDocument) = {
     val handled = mutable.Set.empty[Name]
 
@@ -21,6 +23,7 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
         if !name.parent.exists(_.is[Term.ApplyInfix])
         info <- name.symbol.info
         if !info.isJava
+        if !specialNames.contains(name.value)
         if cond(info.signature) { case MethodSignature(_, List(Nil), _) => true }
       } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
     }.asPatch
