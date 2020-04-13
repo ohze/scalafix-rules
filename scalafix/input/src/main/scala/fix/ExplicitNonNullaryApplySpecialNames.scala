@@ -9,4 +9,11 @@ package fix
 object ExplicitNonNullaryApplySpecialNames {
   ???.asInstanceOf[Int]
   ???.isInstanceOf[String]
+
+  def foo[T](c: () => T) = {
+    val t = c.apply
+    t.getClass
+    t.toString
+    t.hashCode
+  }
 }

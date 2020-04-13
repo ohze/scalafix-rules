@@ -9,7 +9,10 @@ import scalafix.v1._
 
 // https://github.com/scala/scala-rewrites/blob/b2df038/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala
 class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
-  val specialNames = Set("asInstanceOf", "isInstanceOf")
+  val specialNames = Set(
+    "asInstanceOf", "isInstanceOf",
+    "getClass", "hashCode", "toString",
+  )
 
   override def fix(implicit doc: SemanticDocument) = {
     val handled = mutable.Set.empty[Name]
