@@ -16,4 +16,8 @@ object ExplicitNonNullaryApplySpecialNames {
     t.toString
     t.hashCode
   }
+  trait Creator[T] {
+    def create(): T
+  }
+  def baz[T](c: Creator[T]) = foo(c.create _)
 }

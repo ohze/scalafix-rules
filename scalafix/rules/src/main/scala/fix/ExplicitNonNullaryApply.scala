@@ -1,10 +1,10 @@
 package fix
 
-import scala.PartialFunction.{ cond, condOpt }
+import scalafix.util.Trivia
+import scala.meta.tokens.Token.Underscore
+import scala.PartialFunction.{cond, condOpt}
 import scala.collection.mutable
-
 import scala.meta._
-
 import scalafix.v1._
 
 // https://github.com/scala/scala-rewrites/blob/b2df038/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala
@@ -27,6 +27,12 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
         info <- name.symbol.info
         if !info.isJava
         if !specialNames.contains(name.value)
+        // `meth _` must not be patched as `meth() _`
+        if doc
+          .tokenList
+          .trailing(tree.tokens.last)
+          .find(!_.is[Trivia])
+          .forall(!_.is[Underscore])
         if cond(info.signature) { case MethodSignature(_, List(Nil), _) => true }
       } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
     }.asPatch
