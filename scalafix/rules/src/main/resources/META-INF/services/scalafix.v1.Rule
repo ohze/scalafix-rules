@@ -1,3 +1,4 @@
 fix.FinalObject
 fix.ConstructorProcedureSyntax
 fix.ExplicitNonNullaryApply
+fix.Any2StringAdd

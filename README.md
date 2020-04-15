@@ -7,6 +7,9 @@ remove constructor procedure syntax `def this(..) {..}` => `def this(..) = {..}`
 This rule complement to the built-in [ProcedureSyntax](https://github.com/scalacenter/scalafix/blob/master/scalafix-rules/src/main/scala/scalafix/internal/rule/ProcedureSyntax.scala) rule
 + ExplicitNonNullaryApply
 improve from scala/scala-rewrites#14
++ Any2StringAdd
+fix https://github.com/scala/scala-rewrites/issues/18
+plus some improvements
 ## Usage
 + ex, for FinalObject rule:
 ```
