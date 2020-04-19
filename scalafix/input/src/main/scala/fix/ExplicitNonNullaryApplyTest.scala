@@ -3,6 +3,8 @@ rule = ExplicitNonNullaryApply
 */
 package fix
 
+import scala.concurrent.duration.Duration
+
 // ensure ExplicitNonNullaryApply don't add `()` to `???.asInstanceOf[Int]`
 // note: we can define `class A { def asInstanceOf() = ??? }`
 // but we can't call `(new A).asInstanceOf` (without `()`) so we don't need fix that case
@@ -31,4 +33,6 @@ abstract class ExplicitNonNullaryApplyTest {
     def create(): T
   }
   def baz[T](c: Creator[T]) = foo(c.create _)
+
+  (null: Duration).isFinite
 }

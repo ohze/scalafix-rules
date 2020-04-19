@@ -14,6 +14,10 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
     // methods from AnyRef (Object)
     "getClass", "hashCode", "toString", "##", "clone"
   )
+  private val ignore = SymbolMatcher.normalized(
+    // nullary in scala 2.13 but non-nullary in 2.12
+    "scala.concurrent.duration.Duration.isFinite.",
+  )
 
   override def fix(implicit doc: SemanticDocument) = {
     val handled = mutable.Set.empty[Name]
@@ -28,6 +32,7 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
         info <- name.symbol.info
         if !info.isJava
         if !specialNames.contains(name.value)
+        if !ignore.matches(name)
         // `meth _` must not be patched as `meth() _`
         if doc
           .tokenList
