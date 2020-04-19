@@ -9,14 +9,15 @@ import scalafix.v1._
 
 // https://github.com/scala/scala-rewrites/blob/b2df038/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala
 class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
-  val specialNames = Set(
-    "asInstanceOf", "isInstanceOf",
+  private val specialNames = Set(
     // methods from AnyRef (Object)
     "getClass", "hashCode", "toString", "##", "clone"
   )
-  private val ignore = SymbolMatcher.normalized(
+  private val ignore = SymbolMatcher.exact(
+    "scala/Any#asInstanceOf().",
+    "scala/Any#isInstanceOf().",
     // nullary in scala 2.13 but non-nullary in 2.12
-    "scala.concurrent.duration.Duration.isFinite.",
+    "scala/concurrent/duration/Duration#isFinite().",
   )
 
   override def fix(implicit doc: SemanticDocument) = {

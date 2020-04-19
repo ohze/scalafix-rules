@@ -4,6 +4,8 @@ rule = ExplicitNonNullaryApply
 package fix
 
 import scala.concurrent.duration.Duration
+import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 
 // ensure ExplicitNonNullaryApply don't add `()` to `???.asInstanceOf[Int]`
 // note: we can define `class A { def asInstanceOf() = ??? }`
@@ -28,6 +30,14 @@ abstract class ExplicitNonNullaryApplyTest {
     def f = clone
     def f2 = clone()
   }
+  def c: C
+  c.##
+  c.getClass
+  c.toString
+  c.hashCode
+  c.getClass()
+  c.toString()
+  c.hashCode()
 
   trait Creator[T] {
     def create(): T
@@ -35,4 +45,14 @@ abstract class ExplicitNonNullaryApplyTest {
   def baz[T](c: Creator[T]) = foo(c.create _)
 
   (null: Duration).isFinite
+
+  def createInstanceFor[T: ClassTag]: Try[T]
+  // akka.coordination.lease.scaladsl.LeaseProvider#loadLease
+  def loadLease[T: ClassTag]: Try[T] = createInstanceFor[T] match {
+    case s: Success[T] => s
+    case f: Failure[_] => f
+  }
+
+  override def toString: String = ""
+  def toStringTest = this.toString
 }
