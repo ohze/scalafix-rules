@@ -63,3 +63,17 @@ abstract class ExplicitNonNullaryApplyTest {
   this.await() //fix
   this.await()
 }
+
+object Props {
+  def apply[A](): Int = ???
+  def apply1[A, B]: Int = ???
+  Props.apply[Int]() // add `()`
+  Props.apply1[Int, Byte]
+  Props[Int]() // add `()`
+  Props[Int]()
+}
+object Props2 {
+  def apply[A] = ???
+  Props2.apply[Int]
+  Props2[Int] // keep nullary
+}

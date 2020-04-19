@@ -42,6 +42,13 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
           .forall(!_.is[Underscore])
         if cond(info.signature) {
           case MethodSignature(_, List(Nil, _*), _) => true
+          case ClassSignature(_, _, _, decls) if tree.isInstanceOf[Term.ApplyType] =>
+            decls.exists { info =>
+              info.displayName == "apply" &&
+              cond(info.signature) {
+                case MethodSignature(_, List(Nil, _*), _) => true
+              }
+            }
         }
       } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
     }.asPatch
