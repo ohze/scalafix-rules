@@ -52,4 +52,14 @@ abstract class ExplicitNonNullaryApplyTest {
 
   override def toString: String = ""
   def toStringTest = this.toString
+
+  class ActorSystem
+  def await0(implicit system: ActorSystem) = ???
+  def await1(system: ActorSystem) = ???
+  def await()(implicit system: ActorSystem) = ???
+  implicit val system: ActorSystem = ???
+  this.await0
+  this.await1 _
+  this.await() //fix
+  this.await()
 }

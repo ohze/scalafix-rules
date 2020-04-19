@@ -40,7 +40,9 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
           .trailing(tree.tokens.last)
           .find(!_.is[Trivia])
           .forall(!_.is[Underscore])
-        if cond(info.signature) { case MethodSignature(_, List(Nil), _) => true }
+        if cond(info.signature) {
+          case MethodSignature(_, List(Nil, _*), _) => true
+        }
       } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
     }.asPatch
 
