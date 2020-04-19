@@ -11,7 +11,8 @@ import scalafix.v1._
 class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
   val specialNames = Set(
     "asInstanceOf", "isInstanceOf",
-    "getClass", "hashCode", "toString",
+    // methods from AnyRef (Object)
+    "getClass", "hashCode", "toString", "##", "clone"
   )
 
   override def fix(implicit doc: SemanticDocument) = {
