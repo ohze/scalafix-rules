@@ -62,14 +62,10 @@ class ExplicitNonNullaryApplyJava {
   cp.toString
 
   cm.run()
-  cm.run
   cp.run()
-  cp.run
 
   cm.foo()
-  cm.foo
   cp.foo()
-  cp.foo
 
   vcm.toString()
   vcm.toString

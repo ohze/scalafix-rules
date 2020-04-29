@@ -5,7 +5,14 @@ import scala.collection.mutable
 import scala.meta._
 import scalafix.v1._
 
-// https://github.com/scala/scala-rewrites/blob/b2df038/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala
+/** Similar to fix.scala213.ExplicitNonNullaryApply from scala-rewrites project
+ * but don't need scala.meta.internal.pc.ScalafixGlobal to hook into scala-compiler
+ * So this rule can be run with scala 2.13.x
+ * Don't like fix.scala213.ExplicitNonNullaryApply, this rule also add `()` methods
+ * that is defined in java and be overridden in scala.
+ * @see ExplicitNonNullaryApplyJavaPending test
+ * @see [[https://github.com/scala/scala-rewrites/blob/1cea92d/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala fix.scala213.ExplicitNonNullaryApply]]
+ */
 class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
   private val specialNames = Set(
     // methods from AnyRef (Object)
