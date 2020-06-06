@@ -7,7 +7,8 @@ inThisBuild(
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers := List(
         Developer("thanhbv", "Bui Viet Thanh", "thanhbv@sandinh.net", url("https://sandinh.com"))),
-    scalaVersion := V.scala212,
+    scalaVersion := V.scala213,
+    crossScalaVersions := V.supportedScalaVersions,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")))
 
