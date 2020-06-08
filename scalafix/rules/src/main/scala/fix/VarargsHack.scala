@@ -13,6 +13,17 @@ class VarargsHack extends SyntacticRule("VarargsHack") {
     case Mod.Annot(Init(Type.Name("varargs"), _, _)) => true
     case _ => false
   }
+  private def isAssign(name: Term.Name) = name.parent.exists {
+    case Term.Assign(`name`, _) => true
+    case _ => false
+  }
+  private def argSeq(n: Int, tpe: Type) = Term.Apply(
+    Term.ApplyType(
+      Term.Select(Term.Name("immutable"), Term.Name("Seq")),
+      List(tpe)
+    ),
+    0.until(n).map { i => Term.Name(s"a$i")}.toList
+  )
 
   override def fix(implicit doc: SyntacticDocument): Patch =
     doc.tree.collect {
@@ -24,21 +35,13 @@ class VarargsHack extends SyntacticRule("VarargsHack") {
           val varargsParam = if(includeVarargsParam) Seq(last) else Nil
           (args ++ extraArgs ++ varargsParam) +: paramss
         }
-        def isAssign(name: Term.Name) = name.parent.exists {
-          case Term.Assign(`name`, _) => true
-          case _ => false
-        }
-        def argSeq(n: Int) = Term.Apply(
-          Term.Select(Term.Name("immutable"), Term.Name("Seq")),
-          0.until(n).map { i => Term.Name(s"a$i")}.toList
-        )
 
         val marks = scala.collection.mutable.Set.empty[Tree]
         def newBody(n: Int, includeVarargsParam: Boolean = false) = t.body.transform {
           case name @ Term.Name(v) if v == last.name.value && !isAssign(name) && !name.parent.exists(marks.contains) =>
-            if (!includeVarargsParam) argSeq(n)
+            if (!includeVarargsParam) argSeq(n, tpe)
             else {
-              val ret = Term.ApplyInfix(argSeq(n), Term.Name("++"), Nil, List(name))
+              val ret = Term.ApplyInfix(argSeq(n, tpe), Term.Name("++"), Nil, List(name))
               marks += ret
               ret
             }
