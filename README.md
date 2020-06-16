@@ -20,6 +20,19 @@ that is defined in java and be overridden in scala, eg the def in ExplicitNonNul
 fix https://github.com/scala/scala-rewrites/issues/18
 plus some improvements
 
++ NullaryOverride
+Consistent nullary overriding, eg:
+```scala
+trait A {
+  def i: Int
+  def u(): Unit
+}
+trait B {
+  def i() = 1 // fix by remove `()`: def i = 1
+  def u = println("hi") // fix by add `()`: def u() = println("hi")
+}
+```
+
 ## Usage
 + eg, for ExplicitNonNullaryApply rule:
 ```

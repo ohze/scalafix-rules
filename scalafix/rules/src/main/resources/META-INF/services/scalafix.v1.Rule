@@ -3,3 +3,4 @@ fix.ConstructorProcedureSyntax
 fix.ExplicitNonNullaryApply
 fix.Any2StringAdd
 fix.VarargsHack
+fix.NullaryOverride
