@@ -9,7 +9,7 @@ class RuleSuite extends SemanticRuleSuite() {
 
   val (pendingTests, tests) = testsToRun.partition { t =>
     val fileName = t.path.input.toFile.getName
-    fileName.endsWith("Pending.scala") || fileName.endsWith("2040.scala")
+    fileName.endsWith("Pending.scala")
   }
 
   tests.foreach(runOn)
