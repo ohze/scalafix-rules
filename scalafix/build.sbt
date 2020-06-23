@@ -10,21 +10,25 @@ inThisBuild(
     scalaVersion := V.scala213,
     crossScalaVersions := V.supportedScalaVersions,
     addCompilerPlugin(scalafixSemanticdb),
-    scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")))
-
-skip in publish := true
+    scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
+    skip in publish := true,
+  )
+)
 
 lazy val rules = project.settings(
   moduleName := "scalafix-rules",
-  libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % V.scalafixVersion)
+  libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % V.scalafixVersion,
+  skip in publish := false,
+)
 
-lazy val input = project.settings(skip in publish := true)
+lazy val input = project
+
+lazy val output = project
 
 lazy val output = project.settings(skip in publish := true)
 
 lazy val tests = project
   .settings(
-    skip in publish := true,
     libraryDependencies += ("ch.epfl.scala" % "scalafix-testkit" % V.scalafixVersion % Test).cross(CrossVersion.full),
     compile.in(Compile) :=
       compile.in(Compile).dependsOn(compile.in(input, Compile)).value,
