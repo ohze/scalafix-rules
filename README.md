@@ -33,6 +33,15 @@ trait B {
 }
 ```
 
++ ParensAroundLambda
+parentheses are required around the parameter of a lambda
+```scala
+Seq(1).map { i: Int => // rewrite to: Seq(1).map { (i: Int) =>
+ i + 1
+}
+Seq(1).map { i => i + 1 } // keep
+```
+
 ## Usage
 + eg, for ExplicitNonNullaryApply rule:
 ```
