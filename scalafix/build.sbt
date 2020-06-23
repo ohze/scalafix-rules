@@ -1,4 +1,5 @@
 import _root_.scalafix.sbt.{BuildInfo => V}
+import DottySupport._
 
 inThisBuild(
   List(
@@ -25,7 +26,31 @@ lazy val input = project
 
 lazy val output = project
 
-lazy val output = project.settings(skip in publish := true)
+// This project is used to verify that output can be compiled with dotty
+lazy val output3 = output.withId("output3").settings(
+  target := (target.value / "../target-3").getCanonicalFile,
+  crossScalaVersions := Seq("0.24.0", "0.25.0-RC2"),
+  scalaVersion := crossScalaVersions.value.head,
+  libraryDependencies := {
+    val sv = scalaVersion.value
+    libraryDependencies.value.map {
+      case m if m.name == "semanticdb-scalac" => m.withDottyFullCompat(sv)
+      case m => m
+    }
+  },
+  scalacOptions --= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
+  Compile / sources := {
+    val excludes = Set(
+      "Any2StringAddTest", // use symbol literal
+      "ConstructorProcedureSyntaxTest", // don't rewrite normal ProcedureSyntax
+      "ExplicitNonNullaryApply", // `this id[String] ""` - expression expected but '[' found
+      "ExplicitNonNullaryApplyInfix", // `lhs() shouldBe[String] arg()` - expression expected but '[' found
+      "ExplicitNonNullaryApplyOver", // NullaryOverride
+    )
+    (Compile / sources).value.filterNot(f => excludes.contains(f.base))
+  },
+  test := {}
+)
 
 lazy val tests = project
   .settings(

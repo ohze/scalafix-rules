@@ -1,4 +1,5 @@
 /scalafix/.idea
 /scalafix/target
 /scalafix/*/target
+/scalafix/output/target-3
 /scalafix/project/project
