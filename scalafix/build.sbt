@@ -49,7 +49,7 @@ lazy val output3 = output.withId("output3").settings(
     )
     (Compile / sources).value.filterNot(f => excludes.contains(f.base))
   },
-  test := {}
+  test := (Compile / compile).value
 )
 
 lazy val tests = project
