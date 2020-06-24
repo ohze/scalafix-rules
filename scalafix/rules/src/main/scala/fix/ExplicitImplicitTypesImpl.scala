@@ -21,7 +21,7 @@ final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends
 
   override def withConfiguration(config: Configuration) = {
     val symbolReplacements =
-      config.conf.dynamic.ExplicitResultTypes.symbolReplacements
+      config.conf.dynamic.ExplicitImplicitTypes.symbolReplacements
         .as[Map[String, String]]
         .getOrElse(Map.empty)
 

@@ -66,18 +66,13 @@ ExplicitResultTypes {
 => Add type to implicit members of `class`es, `trait`s
 
 2. And this rule
-```diff
+```hocon
 rules = [
-  ExplicitResultTypes
-+  "github:ohze/scalafix-rules/ExplicitImplicitTypes"
+  "github:ohze/scalafix-rules/ExplicitImplicitTypes"
 ]
-ExplicitResultTypes {
-  memberVisibility = [] # only rewrite implicit members
-  skipSimpleDefinitions = []
-+  # maybe need
-+  symbolReplacements {
-+    "scala/concurrent/ExecutionContextExecutor#" = "scala/concurrent/ExecutionContext#"
-+  }
+# maybe need
+ExplicitImplicitTypes.symbolReplacements {
+  "scala/concurrent/ExecutionContextExecutor#" = "scala/concurrent/ExecutionContext#"
 }
 ```
 => Add type to implicit local `def/val/var`s

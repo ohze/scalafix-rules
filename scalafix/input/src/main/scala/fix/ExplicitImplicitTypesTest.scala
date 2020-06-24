@@ -1,6 +1,6 @@
 /*
 rule = ExplicitImplicitTypes
-ExplicitResultTypes.symbolReplacements {
+ExplicitImplicitTypes.symbolReplacements {
   "scala/concurrent/ExecutionContextExecutor#" = "scala/concurrent/ExecutionContext#"
 }
 */
