@@ -11,15 +11,18 @@ final object Abc
 
 #### ConstructorProcedureSyntax
 Remove constructor procedure syntax: `def this(..) {..}` => `def this(..) = {..}`
+
 This rule complement to the built-in [ProcedureSyntax](https://github.com/scalacenter/scalafix/blob/master/scalafix-rules/src/main/scala/scalafix/internal/rule/ProcedureSyntax.scala) rule
 
 #### ExplicitNonNullaryApply
 Compare to [fix.scala213.ExplicitNonNullaryApply](https://github.com/scala/scala-rewrites/blob/1cea92d/rewrites/src/main/scala/fix/scala213/ExplicitNonNullaryApply.scala)
  from scala-rewrites project:
   - Don't need scala.meta.internal.pc.ScalafixGlobal to hook into scala-compiler.
+    
     So this rule also add `()` to methods that is defined in java and be overridden in scala, eg the calls in [ExplicitNonNullaryApplyJavaPending](scalafix/input/src/main/scala/fix/scala213/ExplicitNonNullaryApplyJavaPending.scala) test. 
   - When I try scala-rewrites' ExplicitNonNullaryApply for akka sources, it crashed!
   - Don't need to publishLocal before use. [scala/scala-rewrites#32](https://github.com/scala/scala-rewrites/issues/32)
+    
     [Just add](https://github.com/ohze/akka/blob/dotty/wip/.scalafix.conf) `"github:ohze/scalafix-rules/ExplicitNonNullaryApply"` to `.scalafix.conf`
 
 #### Any2StringAdd
@@ -53,7 +56,7 @@ To explicitly add type to `implicit def/val/var`s (required by dotty) you need:
 1. Use the built-in ExplicitResultTypes rule with config:
 ```hocon
 rules = [
-ExplicitResultTypes
+  ExplicitResultTypes
 ]
 ExplicitResultTypes {
   memberVisibility = [] # only rewrite implicit members
@@ -63,6 +66,20 @@ ExplicitResultTypes {
 => Add type to implicit members of `class`es, `trait`s
 
 2. And this rule
+```diff
+rules = [
+  ExplicitResultTypes
++  "github:ohze/scalafix-rules/ExplicitImplicitTypes"
+]
+ExplicitResultTypes {
+  memberVisibility = [] # only rewrite implicit members
+  skipSimpleDefinitions = []
++  # maybe need
++  symbolReplacements {
++    "scala/concurrent/ExecutionContextExecutor#" = "scala/concurrent/ExecutionContext#"
++  }
+}
+```
 => Add type to implicit local `def/val/var`s
 
 ## Usage

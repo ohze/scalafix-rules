@@ -19,10 +19,16 @@ final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends
 
   def this() = this(LazyValue.later(() => ScalafixGlobal.newCompiler(Nil, Nil, Map.empty)))
 
-  override def withConfiguration(config: Configuration) =
+  override def withConfiguration(config: Configuration) = {
+    val symbolReplacements =
+      config.conf.dynamic.ExplicitResultTypes.symbolReplacements
+        .as[Map[String, String]]
+        .getOrElse(Map.empty)
+
     Configured.ok(new ExplicitImplicitTypesImpl(LazyValue.later { () =>
-      ScalafixGlobal.newCompiler(config.scalacClasspath, config.scalacOptions, Map.empty)
+      ScalafixGlobal.newCompiler(config.scalacClasspath, config.scalacOptions, symbolReplacements)
     }))
+  }
 
   override def isRewrite: Boolean = true
 

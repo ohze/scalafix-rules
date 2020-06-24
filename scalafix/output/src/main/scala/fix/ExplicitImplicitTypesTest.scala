@@ -1,10 +1,11 @@
 package fix
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.ExecutionContext
 
 abstract class ExplicitImplicitTypesTest {
   trait E {
-    def ec: ExecutionContext
+    def ec: ExecutionContextExecutor
   }
   trait T
   

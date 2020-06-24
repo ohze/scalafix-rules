@@ -1,13 +1,16 @@
 /*
 rule = ExplicitImplicitTypes
+ExplicitResultTypes.symbolReplacements {
+  "scala/concurrent/ExecutionContextExecutor#" = "scala/concurrent/ExecutionContext#"
+}
 */
 package fix
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutor
 
 abstract class ExplicitImplicitTypesTest {
   trait E {
-    def ec: ExecutionContext
+    def ec: ExecutionContextExecutor
   }
   trait T
   
