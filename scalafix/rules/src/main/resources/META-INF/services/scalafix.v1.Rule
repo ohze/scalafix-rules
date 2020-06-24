@@ -5,3 +5,4 @@ fix.Any2StringAdd
 fix.VarargsHack
 fix.NullaryOverride
 fix.ParensAroundLambda
+fix.ExplicitImplicitTypes
