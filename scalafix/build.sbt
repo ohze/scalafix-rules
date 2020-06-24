@@ -18,7 +18,7 @@ inThisBuild(
 
 lazy val mergeRules = taskKey[Seq[File]](
   "Merge rules that are implemented in multiple source files into a single .scala file\n" +
-    "so salafix users can use rule \"github:ohze/scalafix-rules/<rule name>\" in .scalafix.conf"
+    "so scalafix users can use rule \"github:ohze/scalafix-rules/<rule name>\" in .scalafix.conf"
 )
 
 lazy val rules = project.settings(
