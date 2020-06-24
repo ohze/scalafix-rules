@@ -30,7 +30,10 @@ lazy val rules = project.settings(
     val srcDir = (Compile / scalaSource).value
     val log = streams.value.log
 
-    val rulesToMerge = Seq("ExplicitImplicitTypes")
+    val rulesToMerge = Seq(
+      "ExplicitImplicitTypes",
+      "ExplicitNonNullaryApply",
+    )
 
     rulesToMerge.map { r =>
       val orig = IO.read(srcDir / "fix" / s"${r}Impl.scala")
