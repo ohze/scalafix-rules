@@ -13,7 +13,7 @@ abstract class ExplicitImplicitTypesTest {
     def ec: ExecutionContextExecutor
   }
   trait T
-  
+
   def f(e: E) = new T {
     private implicit def ec = e.ec
     final implicit val s1 = Seq(1)

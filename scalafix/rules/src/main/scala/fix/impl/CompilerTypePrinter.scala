@@ -40,11 +40,14 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
       defn: m.Defn,
       space: String
   ): Option[v1.Patch] = {
-    if (sym.isGlobal) return None // pls use rule ExplicitResultTypes
-
     val gpos = unit.position(pos.start)
-    val t = GlobalProxy.typedTreeAt(g, gpos)
-    val inverseSemanticdbSymbol = t.symbol
+    val tpe = GlobalProxy.typedTreeAt(g, gpos)
+    val inverseSemanticdbSymbol =
+      if (sym.isLocal) tpe.symbol
+      else
+        g.inverseSemanticdbSymbols(sym.value)
+          .find(s => g.semanticdbSymbol(s) == sym.value)
+          .getOrElse(g.NoSymbol)
     val hasNothing = inverseSemanticdbSymbol.info.exists {
       case g.definitions.NothingTpe => true
       case _ => false
@@ -212,6 +215,7 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
 
   private def isPossibleSyntheticParent(tpe: Type): Boolean = {
     definitions.isPossibleSyntheticParent(tpe.typeSymbol) ||
+    CompilerCompat.serializableClass(g).toSet[Symbol](tpe.typeSymbol) ||
     definitions.AnyRefTpe == tpe ||
     definitions.ObjectTpe == tpe
   }
@@ -234,9 +238,19 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
         case t: MethodType => loop(t.resultType)
         case RefinedType(parents, _) =>
           // Remove redundant `Product with Serializable`, if possible.
-          val strippedParents = parents.filterNot { tpe =>
-            definitions.isPossibleSyntheticParent(tpe.typeSymbol)
-          }
+          val productRootClass = definitions.ProductClass.seq
+            .toSet[Symbol] + definitions.ProductRootClass
+          val serializableClass =
+            CompilerCompat.serializableClass(g).toSet[Symbol]
+          val parentSymbols = parents.map(_.typeSymbol).toSet
+          val strippedParents =
+            if (parentSymbols
+                .intersect(productRootClass)
+                .nonEmpty && parentSymbols
+                .intersect(serializableClass)
+                .nonEmpty) {
+              parents.filterNot(isPossibleSyntheticParent)
+            } else parents
           val newParents =
             if (strippedParents.nonEmpty) strippedParents
             else parents
@@ -299,4 +313,10 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
     g.rootMirror.RootClass,
     g.rootMirror.RootPackage
   )
+}
+
+object CompilerCompat {
+  // support scala 2.13 only
+  def serializableClass(g: ScalafixGlobal): Set[g.ClassSymbol] =
+    Set(g.definitions.SerializableClass)
 }

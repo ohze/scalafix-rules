@@ -57,17 +57,50 @@ final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends
     lazy val types = new CompilerTypePrinter(global.value)
     doc.tree.collect {
       case t @ Defn.Val(mods, Pat.Var(name) :: Nil, None, body)
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) => // t.hasMod(mod"implicit")
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
 
       case t @ Defn.Var(mods, Pat.Var(name) :: Nil, None, Some(body))
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) =>
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
 
       case t @ Defn.Def(mods, name, _, _, None, body)
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) =>
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
     }.asPatch
+  }
+
+  // Don't explicitly annotate vals when the right-hand body is a single call
+  // to `implicitly`. Prevents ambiguous implicit. Not annotating in such cases,
+  // this a common trick employed implicit-heavy code to workaround SI-2712.
+  // Context: https://gitter.im/typelevel/cats?at=584573151eb3d648695b4a50
+  private def isImplicitly(term: Term): Boolean = term match {
+    case Term.ApplyType(Term.Name("implicitly"), _) => true
+    case _ => false
+  }
+
+  def isRuleCandidate(
+     defn: Defn,
+     nm: Name,
+     mods: Iterable[Mod],
+     body: Term
+   )(implicit ctx: SemanticDocument): Boolean = {
+
+    def isFinalLiteralVal: Boolean =
+      defn.is[Defn.Val] &&
+        mods.exists(_.is[Mod.Final]) &&
+        body.is[Lit]
+
+    def isImplicit: Boolean =
+      mods.exists(_.is[Mod.Implicit]) && !isImplicitly(body)
+
+    def hasParentWihTemplate: Boolean =
+      defn.parent.exists(_.is[Template])
+
+    isImplicit &&
+      !isFinalLiteralVal &&
+      nm.symbol.isLocal && // use ExplicitResultTypes for non-local implicits
+      hasParentWihTemplate // use this Rule for local implicits in Template only
   }
 
   def fixDefinition(defn: Defn, body: Term, name: Term.Name, types: TypePrinter)(

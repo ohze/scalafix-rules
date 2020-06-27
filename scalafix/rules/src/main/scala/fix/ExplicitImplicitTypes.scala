@@ -57,17 +57,50 @@ final class ExplicitImplicitTypes(global: LazyValue[ScalafixGlobal]) extends Sem
     lazy val types = new CompilerTypePrinter(global.value)
     doc.tree.collect {
       case t @ Defn.Val(mods, Pat.Var(name) :: Nil, None, body)
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) => // t.hasMod(mod"implicit")
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
 
       case t @ Defn.Var(mods, Pat.Var(name) :: Nil, None, Some(body))
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) =>
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
 
       case t @ Defn.Def(mods, name, _, _, None, body)
-        if mods.exists(_.isInstanceOf[Mod.Implicit]) =>
+        if isRuleCandidate(t, name, mods, body) =>
         fixDefinition(t, body, name, types)
     }.asPatch
+  }
+
+  // Don't explicitly annotate vals when the right-hand body is a single call
+  // to `implicitly`. Prevents ambiguous implicit. Not annotating in such cases,
+  // this a common trick employed implicit-heavy code to workaround SI-2712.
+  // Context: https://gitter.im/typelevel/cats?at=584573151eb3d648695b4a50
+  private def isImplicitly(term: Term): Boolean = term match {
+    case Term.ApplyType(Term.Name("implicitly"), _) => true
+    case _ => false
+  }
+
+  def isRuleCandidate(
+     defn: Defn,
+     nm: Name,
+     mods: Iterable[Mod],
+     body: Term
+   )(implicit ctx: SemanticDocument): Boolean = {
+
+    def isFinalLiteralVal: Boolean =
+      defn.is[Defn.Val] &&
+        mods.exists(_.is[Mod.Final]) &&
+        body.is[Lit]
+
+    def isImplicit: Boolean =
+      mods.exists(_.is[Mod.Implicit]) && !isImplicitly(body)
+
+    def hasParentWihTemplate: Boolean =
+      defn.parent.exists(_.is[Template])
+
+    isImplicit &&
+      !isFinalLiteralVal &&
+      nm.symbol.isLocal && // use ExplicitResultTypes for non-local implicits
+      hasParentWihTemplate // use this Rule for local implicits in Template only
   }
 
   def fixDefinition(defn: Defn, body: Term, name: Term.Name, types: TypePrinter)(
@@ -135,11 +168,14 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
       defn: m.Defn,
       space: String
   ): Option[v1.Patch] = {
-    if (sym.isGlobal) return None // pls use rule ExplicitResultTypes
-
     val gpos = unit.position(pos.start)
-    val t = GlobalProxy.typedTreeAt(g, gpos)
-    val inverseSemanticdbSymbol = t.symbol
+    val tpe = GlobalProxy.typedTreeAt(g, gpos)
+    val inverseSemanticdbSymbol =
+      if (sym.isLocal) tpe.symbol
+      else
+        g.inverseSemanticdbSymbols(sym.value)
+          .find(s => g.semanticdbSymbol(s) == sym.value)
+          .getOrElse(g.NoSymbol)
     val hasNothing = inverseSemanticdbSymbol.info.exists {
       case g.definitions.NothingTpe => true
       case _ => false
@@ -307,6 +343,7 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
 
   private def isPossibleSyntheticParent(tpe: Type): Boolean = {
     definitions.isPossibleSyntheticParent(tpe.typeSymbol) ||
+    CompilerCompat.serializableClass(g).toSet[Symbol](tpe.typeSymbol) ||
     definitions.AnyRefTpe == tpe ||
     definitions.ObjectTpe == tpe
   }
@@ -329,9 +366,19 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
         case t: MethodType => loop(t.resultType)
         case RefinedType(parents, _) =>
           // Remove redundant `Product with Serializable`, if possible.
-          val strippedParents = parents.filterNot { tpe =>
-            definitions.isPossibleSyntheticParent(tpe.typeSymbol)
-          }
+          val productRootClass = definitions.ProductClass.seq
+            .toSet[Symbol] + definitions.ProductRootClass
+          val serializableClass =
+            CompilerCompat.serializableClass(g).toSet[Symbol]
+          val parentSymbols = parents.map(_.typeSymbol).toSet
+          val strippedParents =
+            if (parentSymbols
+                .intersect(productRootClass)
+                .nonEmpty && parentSymbols
+                .intersect(serializableClass)
+                .nonEmpty) {
+              parents.filterNot(isPossibleSyntheticParent)
+            } else parents
           val newParents =
             if (strippedParents.nonEmpty) strippedParents
             else parents
@@ -394,6 +441,12 @@ class CompilerTypePrinter(g: ScalafixGlobal)(
     g.rootMirror.RootClass,
     g.rootMirror.RootPackage
   )
+}
+
+object CompilerCompat {
+  // support scala 2.13 only
+  def serializableClass(g: ScalafixGlobal): Set[g.ClassSymbol] =
+    Set(g.definitions.SerializableClass)
 }
 // end inlining fix/impl/CompilerTypePrinter.scala
 // begin inlining fix/impl/PatchEmptyBody.scala
