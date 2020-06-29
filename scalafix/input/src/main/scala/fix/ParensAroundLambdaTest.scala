@@ -15,4 +15,6 @@ abstract class ParensAroundLambdaTest {
     i + 1
   }
   Seq(1).map { i => i + 1 } // keep
+
+  Seq(1).foreach { implicit i: Int => } // keep
 }
