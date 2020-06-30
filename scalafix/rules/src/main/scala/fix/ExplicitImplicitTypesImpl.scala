@@ -1,7 +1,7 @@
 package fix
 
 import metaconfig.Configured
-import scalafix.internal.rule.{CompilerException, TypePrinter}
+import scalafix.internal.rule.TypePrinter
 import scalafix.internal.v1.LazyValue
 import scalafix.patch.Patch
 import scalafix.util.TokenOps
@@ -10,13 +10,12 @@ import scalafix.v1._
 import scala.meta._
 import scala.meta.contrib._
 import scala.meta.internal.pc.ScalafixGlobal
-import scala.util.control.Exception.nonFatalCatch
 
 import fix.impl.CompilerTypePrinter
 import fix.impl.PatchEmptyBody
+import fix.impl.CompilerDependentRule
 
-final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends SemanticRule("ExplicitImplicitTypes") {
-
+final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends CompilerDependentRule(global, "ExplicitImplicitTypes") {
   def this() = this(LazyValue.later(() => ScalafixGlobal.newCompiler(Nil, Nil, Map.empty)))
 
   override def withConfiguration(config: Configuration) = {
@@ -31,27 +30,6 @@ final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends
   }
 
   override def isRewrite: Boolean = true
-
-  override def afterComplete() = shutdownCompiler()
-  def shutdownCompiler() = for (g <- global) nonFatalCatch { g.askShutdown(); g.close() }
-
-  override def fix(implicit doc: SemanticDocument): Patch = {
-    try unsafeFix() catch {
-      case e: CompilerException =>
-        val input = doc.input match {
-          case f: scala.meta.inputs.Input.File => f.path
-          case i => i.getClass
-        }
-
-        println(s"Retrying fix because $e when fix $input")
-        shutdownCompiler()
-        global.restart()
-        try unsafeFix() catch {
-          case _: CompilerException =>
-            Patch.empty /* ignore compiler crashes */
-        }
-    }
-  }
 
   def unsafeFix()(implicit doc: SemanticDocument): Patch = {
     lazy val types = new CompilerTypePrinter(global.value)
@@ -125,4 +103,3 @@ final class ExplicitImplicitTypesImpl(global: LazyValue[ScalafixGlobal]) extends
     } yield typePatch + PatchEmptyBody(body)
   }.asPatch.atomic
 }
-
