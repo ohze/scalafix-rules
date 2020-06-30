@@ -6,6 +6,7 @@ import scala.PartialFunction.{cond, condOpt}
 import scala.collection.mutable
 import scala.meta._
 import scalafix.v1._
+import ExplicitNonNullaryApplyInternal.Workaround1104
 
 /** Similar to fix.scala213.ExplicitNonNullaryApply from scala-rewrites project
  * but don't need scala.meta.internal.pc.ScalafixGlobal to hook into scala-compiler
@@ -91,6 +92,7 @@ class ExplicitNonNullaryApply extends SemanticRule("ExplicitNonNullaryApply") {
     case Type.Select(_, name: Type.Name) => name
   }
 }
+object ExplicitNonNullaryApplyInternal {
 // begin inlining fix/impl/Workaround1104.scala
 
 import scalafix.v1.{SemanticDocument, Symbol}
@@ -135,3 +137,4 @@ object Workaround1104 {
   }
 }
 // end inlining fix/impl/Workaround1104.scala
+}

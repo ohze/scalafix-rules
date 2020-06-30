@@ -34,6 +34,7 @@ lazy val rules = project.settings(
     val rulesToMerge = Seq(
       "ExplicitImplicitTypes",
       "ExplicitNonNullaryApply",
+      "NullaryOverride",
     )
 
     rulesToMerge.map { r =>
