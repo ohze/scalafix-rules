@@ -46,9 +46,14 @@ lazy val rules = project.settings(
           |""".stripMargin)
 
       IO.read(srcDir / "fix" / s"${r}Impl.scala").linesIterator.foreach {
-        case s if s.startsWith(importPrefix) => imports += s.substring(importPrefix.length)
-        case s => bf ++= s.replace(s"${r}Impl", r) += '\n'
+        case s if s.startsWith(importPrefix) =>
+          imports += s.substring(importPrefix.length)
+          bf ++= s.replace(importPrefix, s"import ${r}Internal.") += '\n'
+        case s =>
+          bf ++= s.replace(s"${r}Impl", r) += '\n'
       }
+
+      bf ++= s"object ${r}Internal {\n"
 
       imports.foreach { name =>
         val f = s"fix/impl/$name.scala"
@@ -57,6 +62,8 @@ lazy val rules = project.settings(
           IO.read(srcDir / f).stripPrefix("package fix.impl\n") ++=
           s"// end inlining $f\n"
       }
+
+      bf ++= s"}\n"
 
       val f = srcDir / "fix" / s"$r.scala"
       IO.write(f, bf.result())
