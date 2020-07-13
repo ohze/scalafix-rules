@@ -1,6 +1,10 @@
 # Scalafix rules
 [![Build Statud](https://github.com/ohze/scalafix-rules/workflows/Scala%20CI/badge.svg)](https://github.com/ohze/scalafix-rules/actions?query=workflow%3A%22Scala+CI%22)
 
+## Deprecated. Please use https://github.com/ohze/scala-rewrites
+All rules are migrated to that project!
+
+## Old README
 This project contains scalafix rules I create when migrating [akka](https://github.com/akka/akka/) to dotty.
 
 #### ConstructorProcedureSyntax
